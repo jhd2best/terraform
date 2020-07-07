@@ -384,7 +384,7 @@ function do_copy_multikey
 }
 
 ###############################################################################
-LOGDIR=../../pipeline/logs/$HMY_PROFILE
+LOGDIR=logs
 DRYRUN=echo
 OUTPUT=$LOGDIR/$(date +%F.%H:%M:%S).log
 SYNC=true
@@ -426,8 +426,7 @@ if [ ! -d $STATEDIR ]; then
 fi
 
 if [ ! -d $LOGDIR ]; then
-   echo invalid log directory: $LOGDIR
-   exit 0
+   mkdir $LOGDIR
 fi
 
 case $CMD in
