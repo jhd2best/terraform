@@ -252,7 +252,7 @@ function copy_mk_pass
 {
    ips=$@
    for ip in $ips; do
-      $SSH gce-user@$ip 'cd .hmy/blskeys; for f in *.key; do p=${f%%.key}; cp /home/ec2-user/bls.pass $p.pass; done'
+      $SSH ec2-user@$ip 'cd .hmy/blskeys; for f in *.key; do p=${f%%.key}; cp /home/ec2-user/bls.pass $p.pass; done'
    done
 }
 
