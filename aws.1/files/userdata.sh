@@ -17,3 +17,4 @@ tar xfz node_exporter-0.18.1.linux-amd64.tar.gz
 mv -f node_exporter-0.18.1.linux-amd64/node_exporter /usr/local/bin
 rm -rf node_exporter-0.18.1.linux-amd64.tar.gz node_exporter-0.18.1.linux-amd64
 useradd -rs /bin/false node_exporter
+chown node_exporter.node_exporter /usr/local/bin/node_exporter
