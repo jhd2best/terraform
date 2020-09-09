@@ -1,6 +1,6 @@
 variable "public_key_path" {
   description = "The path to the SSH Public Key to add to GCP."
-  default     = "keys/harmony-node.pub"
+  default     = "~/.ssh/harmony-node.pub"
 }
 
 variable "private_key_path" {
@@ -10,12 +10,12 @@ variable "private_key_path" {
 
 variable "node_volume_size" {
   description = "Root Volume size of the GCP node instance"
-  default     = 200
+  default     = 50
 }
 
 variable "node_instance_type" {
   description = "Instance type of the GCP node instance"
-  default     = "n1-standard-1"
+  default     = "n2-standard-2"
 }
 
 variable "region" {

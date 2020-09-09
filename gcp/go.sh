@@ -4,6 +4,7 @@ SSH='ssh -o StrictHostKeyChecking=no -o LogLevel=error -o ConnectTimeout=5 -o Gl
 HARMONYDB=harmony.go
 SYNC=true
 INSTANCE=n2-standard-2
+PROJECT=benchmark-209420
 
 # assuming 4 shard, calculate the shard number based on index number, mod 4
 NUM_SHARDS=4
@@ -203,6 +204,7 @@ function do_new_mk
    tag=$(cat files/multikey.txt | tr "\n" "-" | sed "s/-$//")
    cp -f files/harmony-mk.service files/service/harmony.service
    _do_launch_one ${indexes[0]} $tag
+   gcloud config set project $PROJECT
    gcloud compute instances add-labels $NAME --zone $zone --labels="name=s${shard}-${i_name}-${tag},shard=${shard},index=${tag},type=validator"
 
    copy_mk_pass $IP
