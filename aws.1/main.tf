@@ -4,16 +4,12 @@ provider "aws" {
   profile                 = "mainnet"
 }
 
-resource "aws_spot_instance_request" "foundation-node" {
+resource "aws_instance" "foundation-node" {
   ami                             = data.aws_ami.harmony-node-ami.id
-  spot_price                      = var.spot_instance_price
   instance_type                   = var.node_instance_type
   vpc_security_group_ids          = [lookup(var.security_groups, var.aws_region, var.default_key)]
   key_name                        = "harmony-node"
-  wait_for_fulfillment            = true
   user_data                       = file(var.user_data)
-  spot_type                       = var.spot_type
-  instance_interruption_behaviour = var.instance_interruption_behaviour
 
   root_block_device {
     volume_type           = "gp2"
@@ -39,7 +35,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/bls.key"
     destination = "/home/ec2-user/bls.key"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -50,7 +46,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/blskeys"
     destination = "/home/ec2-user/.hmy"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -61,7 +57,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/bls.pass"
     destination = "/home/ec2-user/bls.pass"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -72,7 +68,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/service/harmony.service"
     destination = "/home/ec2-user/harmony.service"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -83,7 +79,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/node_exporter.service"
     destination = "/home/ec2-user/node_exporter.service"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -94,7 +90,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/rclone.conf"
     destination = "/home/ec2-user/rclone.conf"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -105,7 +101,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/rclone.sh"
     destination = "/home/ec2-user/rclone.sh"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -116,7 +112,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/uploadlog.sh"
     destination = "/home/ec2-user/uploadlog.sh"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -127,7 +123,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/crontab"
     destination = "/home/ec2-user/crontab"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -138,7 +134,7 @@ resource "aws_spot_instance_request" "foundation-node" {
     source      = "files/multikey.txt"
     destination = "/home/ec2-user/multikey.txt"
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
@@ -166,7 +162,7 @@ resource "aws_spot_instance_request" "foundation-node" {
       "mkdir -p harmony_db_0; mkdir -p harmony_db_${var.default_shard}",
     ]
     connection {
-      host        = aws_spot_instance_request.foundation-node.public_ip
+      host        = aws_instance.foundation-node.public_ip
       type        = "ssh"
       user        = "ec2-user"
       agent       = true
