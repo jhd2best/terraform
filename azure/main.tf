@@ -16,14 +16,14 @@ data "azurerm_subnet" "main" {
 }
 
 resource "azurerm_public_ip" "main" {
-  name                = "node-${var.blskey_index}-${random_id.vm_id.hex}-ip"
+  name                = "${var.name}-ip"
   location            = var.location
   resource_group_name = "${var.network}-${var.location}"
   allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "main" {
-  name                = "node-${var.blskey_index}-${random_id.vm_id.hex}-nic"
+  name                = "${var.name}-nic"
   location            = var.location
   resource_group_name = "${var.network}-${var.location}"
 
@@ -36,7 +36,7 @@ resource "azurerm_network_interface" "main" {
 }
 
 resource "azurerm_virtual_machine" "main" {
-  name                  = "node-${var.blskey_index}-${random_id.vm_id.hex}"
+  name                  = "${var.name}"
   location              = var.location
   resource_group_name   = "${var.network}-${var.location}"
   network_interface_ids = [azurerm_network_interface.main.id]
@@ -53,14 +53,15 @@ resource "azurerm_virtual_machine" "main" {
   }
 
   storage_os_disk {
-    name              = "noed-${var.blskey_index}-${random_id.vm_id.hex}-os-disk"
+    name              = "${var.name}-os-disk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
+    disk_size_gb      = "80"
   }
 
   os_profile {
-    computer_name  = "node-${var.blskey_index}-${random_id.vm_id.hex}"
+    computer_name  = "${var.name}"
     admin_username = "hmy"
   }
 
@@ -72,14 +73,9 @@ resource "azurerm_virtual_machine" "main" {
     }
   }
 
-  // TODO
-  # provisioner "local-exec" {
-  #   command = "aws s3 cp s3://harmony-secret-keys/bls/${lookup(var.harmony_sentry_node_blskeys, var.blskey_index, var.default_key)}.key files/bls.key"
-  # }
-
   provisioner "file" {
-    source      = "files/blskeys/${lookup(var.harmony_sentry_node_blskeys, var.blskey_index, var.default_key)}.key"
-    destination = "/home/hmy/bls.key"
+    source      = "files/blskeys"
+    destination = "/home/hmy/.hmy"
     connection {
       host        = azurerm_public_ip.main.ip_address
       type        = "ssh"
@@ -90,7 +86,7 @@ resource "azurerm_virtual_machine" "main" {
   }
 
   provisioner "file" {
-    source      = "files/blskeys/bls.pass"
+    source      = "files/bls.pass"
     destination = "/home/hmy/bls.pass"
     connection {
       host        = azurerm_public_ip.main.ip_address
@@ -139,7 +135,7 @@ resource "azurerm_virtual_machine" "main" {
 
   provisioner "file" {
     source      = "files/rclone.conf"
-    destination = "/home/hmy/rclone.conf"
+    destination = "/home/hmy"
     connection {
       host        = azurerm_public_ip.main.ip_address
       type        = "ssh"
@@ -152,18 +148,6 @@ resource "azurerm_virtual_machine" "main" {
   provisioner "file" {
     source      = "files/uploadlog.sh"
     destination = "/home/hmy/uploadlog.sh"
-    connection {
-      host        = azurerm_public_ip.main.ip_address
-      type        = "ssh"
-      user        = "hmy"
-      private_key = file(var.ssh_private_key_path)
-      timeout     = "1m"
-    }
-  }
-
-  provisioner "file" {
-    source      = "files/node_exporter.sh"
-    destination = "/home/hmy/node_exporter.sh"
     connection {
       host        = azurerm_public_ip.main.ip_address
       type        = "ssh"
@@ -207,7 +191,7 @@ resource "azurerm_virtual_machine" "main" {
       "chmod +x node.sh rclone.sh uploadlog.sh node_exporter.sh reboot.sh",
       "mkdir -p /home/hmy/.config/rclone",
       "mkdir -p /home/hmy/.hmy/blskeys",
-      "mv -f /home/hmy/*.key /home/hmy/.hmy/blskeys",
+      "mv -f /home/hmy/.hmy/*.key /home/hmy/.hmy/blskeys",
       "mv -f rclone.conf /home/hmy/.config/rclone",
       "crontab crontab",
       "/home/hmy/node.sh -I -d && cp -f /home/hmy/staging/harmony /home/hmy",

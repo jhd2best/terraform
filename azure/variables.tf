@@ -1,3 +1,8 @@
+variable "name" {
+  description = "the name of Harmony Node"
+  default     = "harmony-node"
+}
+
 variable "shard" {
   description = "the shard number the Harmony Node"
   default     = "0"
@@ -25,12 +30,12 @@ variable "vm_size" {
 
 variable "ssh_private_key_path" {
   description = "your SSH private key path"
-  default     = "~/.ssh/id_rsa"
+  default     = "~/.ssh/harmony-node.pem"
 }
 
 variable "ssh_public_key_path" {
   description = "your SSH public key path"
-  default     = "~/.ssh/id_rsa.pub"
+  default     = "~/.ssh/harmony-node.pub"
 }
 
 variable "default_key" {

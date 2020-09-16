@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-SSH='ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o LogLevel=error -o ConnectTimeout=5 -o GlobalKnownHostsFile=/dev/null'
+SSH='ssh -i ~/.ssh/harmony-node.pem -o StrictHostKeyChecking=no -o LogLevel=error -o ConnectTimeout=5 -o GlobalKnownHostsFile=/dev/null'
+HARMONYDB=harmony.go
 
 function usage
 {
@@ -21,6 +22,7 @@ COMMANDS:
    uptime [list of ip]              list of IP addresses to update uptime robot, will generate uptimerobot.sh cli
 EXAMPLES:
    $me new 308
+   $me newmk 20 40 80
    $me rclone 1.2.3.4
    $me wait 1.2.3.4 2.2.2.2
    $me uptime 1.2.3.4 2.2.2.2
@@ -71,6 +73,7 @@ function get_regions
 function _do_launch_one
 {
    local index=$1
+   local name=$2
 
    if [ -z "$index" ]; then
       echo blskey_index is empty, ignoring
@@ -86,14 +89,11 @@ function _do_launch_one
 
    shard=$(( $index % 4 ))
 
-   terraform apply -var "blskey_index=$index" -var "shard=$shard" -var "location=$location"  -auto-approve || return
+   terraform apply -var "blskey_index=$index" -var "shard=$shard" -var "location=$location" -var "name=$name"  -auto-approve || return
    sleep 3
    IP=$(terraform output | grep 'public_ip = ' | awk -F= ' { print $2 } ' | tr -d ' ')
    sleep 1
-   mv -f terraform.tfstate states/terraform.tfstate.azure.$index
-
-   # reboot the instance to ensure selinux is disabled - DO only
-   $SSH hmy@$IP 'sudo ./reboot.sh'
+   mv -f terraform.tfstate states/terraform-$name.tfstate
 }
 
 function new_instance
@@ -101,8 +101,57 @@ function new_instance
    indexes=$@
    rm -f ip.txt
    for i in $indexes; do
-      _do_launch_one $i
+      _do_launch_one $i "s${shard}-a2"
       echo $IP >> ip.txt
+   done
+}
+
+# new host with multiple bls keys
+function do_new_mk
+{
+   indexes=( $@ )
+   shard=-1
+   for idx in ${indexes[@]}; do
+      idx_shard=$(( $idx % 4 ))
+      if [ $shard == -1 ]; then
+         shard=$idx_shard
+      else
+         if [ $shard != $idx_shard ]; then
+            errexit "shard: $shard should be identical. $idx is in shard $idx_shard."
+         fi
+      fi
+   done
+   # clean the existing blskeys
+   rm -f files/blskeys/*.key
+   rm -f files/multikey.txt
+
+   for idx in ${indexes[@]}; do
+      _do_copy_blskeys $idx
+      echo $idx >> files/multikey.txt
+   done
+   tag=$(cat files/multikey.txt | tr "\n" "-" | sed "s/-$//")
+   cp -f files/harmony-mk.service files/service/harmony.service
+   _do_launch_one ${indexes[0]} "s${shard}-a2-${tag}"
+
+   copy_mk_pass $IP
+   rclone_sync $IP
+   do_wait $IP
+}
+
+# copy one blskey keyfile files/blskeys directory
+function _do_copy_blskeys
+{
+   index=$1
+   key=$(grep "Index:...$index " $HARMONYDB | grep -oE 'BlsPublicKey:..[a-z0-9]+' | cut -f2 -d: | tr -d \" | tr -d " ")
+   aws s3 cp s3://harmony-secret-keys/bls/${key}.key files/blskeys/${key}.key
+}
+
+# copy bls.pass to .hmy/blskeys
+function copy_mk_pass
+{
+   ips=$@
+   for ip in $ips; do
+      $SSH hmy@$ip 'cd .hmy/blskeys; for f in *.key; do p=${f%%.key}; cp /home/hmy/bls.pass $p.pass; done'
    done
 }
 
@@ -184,7 +233,7 @@ function update_uptime
 }
 
 ##############################################################################
-SYNC=false
+SYNC=true
 
 while getopts "hvS" option; do
    case $option in
@@ -211,5 +260,6 @@ case $CMD in
    rclone) rclone_sync $@ ;;
    wait) do_wait $@ ;;
    uptime) update_uptime $@ ;;
+   newmk) do_new_mk $@ ;;
    *) usage ;;
 esac
