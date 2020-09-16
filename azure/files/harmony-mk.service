@@ -1,0 +1,19 @@
+[Unit]
+Description=harmony service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=hmy
+WorkingDirectory=/home/hmy
+ExecStart=/home/hmy/node.sh -1MSPD
+StandardError=syslog
+SyslogIdentifier=harmony
+StartLimitInterval=0
+LimitNOFILE=65536
+LimitNPROC=65536
+
+[Install]
+WantedBy=multi-user.target
