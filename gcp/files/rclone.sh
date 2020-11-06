@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-FOLDER=${1:-mainnet}
+FOLDER=${1:-mainnet.min}
 
 while :; do
    if command -v rclone; then
