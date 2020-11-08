@@ -135,7 +135,7 @@ resource "azurerm_virtual_machine" "main" {
 
   provisioner "file" {
     source      = "files/rclone.conf"
-    destination = "/home/hmy"
+    destination = "/home/hmy/rclone.conf"
     connection {
       host        = azurerm_public_ip.main.ip_address
       type        = "ssh"

@@ -15,6 +15,8 @@ PREREQUISITE:
 OPTIONS:
    -h                               print this help message
    -S                               enabled state pruning for the node (default: false)
+   -r <region>                      specify the region (default: $REG)
+                                    supported region: $(echo ${REGIONS[@]} | tr " " ,)
 COMMANDS:
    new [list of index]              list of blskey index
    rclone [list of ip]              list of IP addresses to run rclone 
@@ -80,16 +82,18 @@ function _do_launch_one
       return
    fi
 
-   if [[ $index -lt 0 || $index -ge 680 ]]; then
+   if [[ $index -lt 0 || $index -ge 360 ]]; then
       echo index: $index is out of bound, ignoring
       return
    fi
 
-   location=${alllocations[$RANDOM % ${#alllocations[@]}]}
+   if [ "$REG" == "random" ]; then
+      REG=${alllocations[$RANDOM % ${#alllocations[@]}]}
+   fi
 
    shard=$(( $index % 4 ))
 
-   terraform apply -var "blskey_index=$index" -var "shard=$shard" -var "location=$location" -var "name=$name"  -auto-approve || return
+   terraform apply -var "blskey_index=$index" -var "shard=$shard" -var "location=$REG" -var "name=$name"  -auto-approve || return
    sleep 3
    IP=$(terraform output | grep 'public_ip = ' | awk -F= ' { print $2 } ' | tr -d ' ')
    sleep 1
@@ -234,11 +238,13 @@ function update_uptime
 
 ##############################################################################
 SYNC=true
+REG=random
 
 while getopts "hvS" option; do
    case $option in
       v) VERBOSE=true ;;
       S) SYNC=true ;;
+      r) REG="${OPTARG}" ;;
       h|?|*) usage ;;
    esac
 done
