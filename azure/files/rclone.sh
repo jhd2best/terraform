@@ -29,14 +29,14 @@ for s in 3 2 1; do
       shard=${s}
       # download shard db
       echo rclone syncing harmony_db_${shard}
-      rclone sync -P mainnet:pub.harmony.one/${FOLDER}/harmony_db_${shard} /home/hmy/harmony_db_${shard}
+      rclone sync -P mainnet-do:pub.harmony/${FOLDER}/harmony_db_${shard} /home/hmy/harmony_db_${shard}
       break
    fi
 done
 
 # download beacon chain db anyway
 echo rclone syncing harmony_db_0
-rclone sync -P mainnet:pub.harmony.one/${FOLDER}/harmony_db_0 /home/hmy/harmony_db_0
+rclone sync -P mainnet-do:pub.harmony/${FOLDER}/harmony_db_0 /home/hmy/harmony_db_0
 
 # restart the harmony service
 sudo systemctl start harmony.service
