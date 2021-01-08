@@ -100,7 +100,7 @@ function _do_launch_one
       return
    fi
 
-   if [[ $index -le 0 || $index -ge 680 ]]; then
+   if [[ $index -lt 0 || $index -ge 360 ]]; then
       echo index: $index is out of bound, ignoring
       return
    fi
