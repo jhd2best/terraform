@@ -135,7 +135,7 @@ function _do_launch_one {
 # enable state pruning
    if $SYNC; then
       vars+=(
-         -var "node_volume_size=30"
+         -var "node_volume_size=80"
       )
    fi
 
