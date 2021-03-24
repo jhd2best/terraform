@@ -143,14 +143,13 @@ resource "aws_instance" "foundation-node" {
 
   provisioner "remote-exec" {
     inline = [
-      "curl -LO https://harmony.one/node.sh",
-      "chmod +x node.sh rclone.sh uploadlog.sh",
+      "curl -LO https://harmony.one/binary && mv binary harmony",
+      "chmod +x harmony rclone.sh uploadlog.sh",
       "mkdir -p /home/ec2-user/.config/rclone",
       "mkdir -p /home/ec2-user/.hmy/blskeys",
       "mv -f /home/ec2-user/.hmy/*.key /home/ec2-user/.hmy/blskeys",
       "mv -f rclone.conf /home/ec2-user/.config/rclone",
       "crontab crontab",
-      "/home/ec2-user/node.sh -I -d && cp -f /home/ec2-user/staging/harmony /home/ec2-user",
       "sudo cp -f harmony.service /etc/systemd/system/harmony.service",
       "sudo cp -f node_exporter.service /etc/systemd/system/node_exporter.service",
       "sudo systemctl daemon-reload",
