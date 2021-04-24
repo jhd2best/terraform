@@ -126,26 +126,29 @@ function _do_launch_one {
    fi
    shard=$(( $index % 4 ))
 
-   vars=(
-      -var "blskey_index=$index" 
-      -var "default_shard=$shard"
-      -var "node_instance_type=$INSTANCE" 
-      -var "spot_instance_price=${SPOT[$INSTANCE]}"
-   )
-# enable state pruning
-   if $SYNC; then
-      vars+=(
-         -var "node_volume_size=30"
-      )
+   local volume_size=30
+   local userdata_path="files/userdata.sh"
+
+   # special config for AWS c5d.xlarge instance type
+   if [ "$INSTANCE" == "c5d.xlarge" ]; then
+      $volume_size=8
+      $userdata_path="files/userdata-c5d.sh"
    fi
 
    if [ "$REG" == "random" ]; then
       REG=${REGIONS[$RANDOM % ${#REGIONS[@]}]}
    fi
 
-   vars+=(
+   vars=(
+      -var "blskey_index=$index" 
+      -var "default_shard=$shard"
+      -var "node_instance_type=$INSTANCE" 
+      -var "spot_instance_price=${SPOT[$INSTANCE]}"
+      -var "node_volume_size=$volume_size"
+      -var "user_data=$userdata_path"
       -var "aws_region=$REG"
    )
+
    terraform apply "${vars[@]}" -auto-approve || return
    sleep 3
    IP=$(terraform output -json | jq -rc '.public_ip.value  | @tsv')
@@ -286,6 +289,13 @@ function do_new_mk
    aws --profile mainnet --region $REG ec2 create-tags --resources $ID --tags "Key=Name,Value=s${shard}-${i_name}-${tag}" "Key=Shard,Value=${shard}" "Key=Index,Value=${tag}" "Key=Type,Value=node"
 
    copy_mk_pass $IP
+
+   # wait c5d userdata running
+   if [ "$INSTANCE" == "c5d.xlarge" ]; then
+      sleep 60
+   fi
+
+   # sync block data snapshot
    rclone_sync $IP
    do_wait $IP
 }
