@@ -8,7 +8,7 @@ Restart=always
 RestartSec=1
 User=ec2-user
 WorkingDirectory=/home/ec2-user
-ExecStart=/home/ec2-user/harmony --run.legacy --http.ip 0.0.0.0
+ExecStart=/home/ec2-user/harmony --run.legacy --http.ip=0.0.0.0 --datadir=data
 StandardError=syslog
 SyslogIdentifier=harmony
 StartLimitInterval=0
