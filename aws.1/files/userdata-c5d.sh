@@ -10,8 +10,8 @@ p
 w
 EOF
 
-mkfs.ext4 /dev/nvme1n1p1
 sleep 10
+mkfs.ext4 /dev/nvme1n1p1
 
 # mount data disk
 mkdir /data && \

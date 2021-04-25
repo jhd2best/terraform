@@ -21,14 +21,10 @@ sudo systemctl stop harmony.service
 unset shard
 
 # determine the shard number
-for s in 3 2 1; do
-   if [ -d harmony_db_${s} ]; then
-      shard=${s}
-      # download shard db
-      rclone sync -P release:pub.harmony.one/${FOLDER}/harmony_db_${shard} data/harmony_db_${shard}
-      break
-   fi
-done
+shard=$(cat shard.txt)
+if [ $shard != 0 ]; then
+   rclone sync -P release:pub.harmony.one/${FOLDER}/harmony_db_${shard} data/harmony_db_${shard}
+fi
 
 # download beacon chain db anyway
 rclone sync -P release:pub.harmony.one/${FOLDER}/harmony_db_0 data/harmony_db_0
