@@ -131,8 +131,8 @@ function _do_launch_one {
 
    # special config for AWS c5d.xlarge instance type
    if [ "$INSTANCE" == "c5d.xlarge" ]; then
-      $volume_size=8
-      $userdata_path="files/userdata-c5d.sh"
+      volume_size=8
+      userdata_path="files/userdata-c5d.sh"
    fi
 
    if [ "$REG" == "random" ]; then
