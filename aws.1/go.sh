@@ -292,7 +292,7 @@ function do_new_mk
 
    # wait c5d userdata running
    if [ "$INSTANCE" == "c5d.xlarge" ]; then
-      sleep 120
+      sleep 60
    fi
 
    # sync block data snapshot

@@ -10,7 +10,8 @@ p
 w
 EOF
 
-sleep 10
+# make file-system
+sleep 5
 mkfs.ext4 /dev/nvme1n1p1
 
 # mount data disk
@@ -21,18 +22,18 @@ mkdir /data/harmony
 cp /etc/fstab /etc/fstab.bak
 echo `blkid /dev/nvme1n1p1 | awk '{print $2}' | sed 's/\"//g'` /data ext4 defaults 0 0 | tee -a /etc/fstab
 
+# setup harmomy user environment
+mkdir -p /home/ec2-user/.hmy /home/ec2-user/.config/rclone
+ln -s /data/harmony /home/ec2-user/data
+
+chown -R ec2-user:ec2-user /home/ec2-user/.hmy /home/ec2-user/.config /data/harmony /home/ec2-user/data
+
 # install base environment
 yum update -y
 yum install -y bind-utils jq
 
 # install rclone
 curl https://rclone.org/install.sh | bash
-
-# setup harmomy user environment
-mkdir -p /home/ec2-user/.hmy /home/ec2-user/.config/rclone
-ln -s /data/harmony /home/ec2-user/data
-
-chown -R ec2-user:ec2-user /home/ec2-user/.hmy /home/ec2-user/.config /data/harmony /home/ec2-user/data
 
 # install node_exporter
 curl -LO https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz
