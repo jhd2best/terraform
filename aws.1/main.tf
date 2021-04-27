@@ -141,6 +141,17 @@ resource "aws_instance" "foundation-node" {
     }
   }
 
+  provisioner "file" {
+    source      = "files/harmony.conf"
+    destination = "/home/ec2-user/harmony.conf"
+    connection {
+      host        = aws_instance.foundation-node.public_ip
+      type        = "ssh"
+      user        = "ec2-user"
+      agent       = true
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
       "curl -LO https://harmony.one/binary && mv binary harmony",
