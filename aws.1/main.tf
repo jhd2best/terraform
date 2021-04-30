@@ -154,7 +154,7 @@ resource "aws_instance" "foundation-node" {
 
   provisioner "remote-exec" {
     inline = [
-      "curl -LO ${var.binary_download_source} && mv binary harmony",
+      "curl -L ${var.binary_download_source} -o harmony",
       "chmod +x harmony rclone.sh uploadlog.sh",
       "mkdir -p /home/ec2-user/.config/rclone",
       "mkdir -p /home/ec2-user/.hmy/blskeys",
