@@ -1,5 +1,4 @@
 SHELL=/usr/bin/bash
 HOME=/home/ec2-user
 
-30 0 * * *  /home/ec2-user/uploadlog.sh >> $HOME/upload.log 2>&1
 0 0 * * * find ./latest -name "*.log*" -mtime +7 -type f -exec rm -f {} \;
