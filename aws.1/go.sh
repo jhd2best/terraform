@@ -147,6 +147,7 @@ function _do_launch_one {
       -var "node_volume_size=$volume_size"
       -var "user_data=$userdata_path"
       -var "aws_region=$REG"
+      -var "binary_download_source=$URL"
    )
 
    terraform apply "${vars[@]}" -auto-approve || return
@@ -369,7 +370,7 @@ INSTANCE=c5.large
 REG=random
 MKHOST=
 
-while getopts "hnvGss:d:Si:r:M:" option; do
+while getopts "hnvGss:d:Si:r:M:u:" option; do
    case $option in
       n) DRYRUN=echo [DRYRUN] ;;
       v) VERBOSE=-v ;;
@@ -380,6 +381,7 @@ while getopts "hnvGss:d:Si:r:M:" option; do
       i) INSTANCE="${OPTARG}" ;;
       r) REG="${OPTARG}" ;;
       M) MKHOST="${OPTARG}" ;;
+      u) URL="${OPTARG}" ;;
       h|?|*) usage ;;
    esac
 done

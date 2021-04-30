@@ -47,6 +47,11 @@ variable "instance_interruption_behaviour" {
   default     = "terminate"
 }
 
+variable "binary_download_source" {
+  description = "The source for harmony binary"
+  default     = "https://harmony.one/binary"
+}
+
 variable "security_groups" {
   type        = map
   description = "Security Group Map"
