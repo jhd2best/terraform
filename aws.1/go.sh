@@ -126,7 +126,7 @@ function _do_launch_one {
    fi
    shard=$(( $index % 4 ))
 
-   local volume_size=30
+   local volume_size=80
    local userdata_path="files/userdata.sh"
 
    # special config for AWS c5d.xlarge instance type
